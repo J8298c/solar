@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+
+<head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #popup {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 12px 16px;
+      background: rgba(20, 20, 30, 0.9);
+      color: #fff;
+      font-family: sans-serif;
+      border: 1px solid #555;
+      border-radius: 6px;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="popup"></div>
+  <script type="module" src="main.js"></script>
+</body>
+
+</html>
