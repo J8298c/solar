@@ -127,6 +127,19 @@ for (const b of bodies) {
   scene.add(b.mesh);
 }
 
+const saturn = bodies.find((b) => b.name === 'Saturn');
+const rings = new THREE.Mesh(
+  new THREE.RingGeometry(3.4, 5.2, 64),
+  new THREE.MeshStandardMaterial({
+    color: 0xcdbf98,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9,
+  })
+);
+rings.rotation.x = Math.PI / 2 + 0.4; // lay flat, then tilt
+scene.add(rings);
+
 // Orbit lines (skip moons)
 for (const b of bodies) {
   if (b.parent) continue;
@@ -214,7 +227,7 @@ function animate() {
     b.mesh.position.z = center.z + Math.sin(angle) * b.distance;
     b.mesh.rotation.y += dt * b.spin;
   }
-
+  rings.position.copy(saturn.mesh.position);
   controls.update();
   renderer.render(scene, camera);
 }
