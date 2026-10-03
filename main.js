@@ -18,9 +18,12 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
 // Sun
+const sunMap = new THREE.TextureLoader().load("textures/2k_sun.jpg");
+sunMap.colorSpace = THREE.SRGBColorSpace;
+
 const sun = new THREE.Mesh(
   new THREE.SphereGeometry(5, 32, 32),
-  new THREE.MeshBasicMaterial({ color: 0xffcc33 }),
+  new THREE.MeshBasicMaterial({ map: sunMap }),
 );
 sun.userData = { name: "Sun", radius: 5, distance: 0 };
 scene.add(sun);
@@ -42,7 +45,7 @@ const bodies = [
     speed: 1.6,
     spin: 0.5,
     phase: 0.0,
-    color: 0xaaaaaa,
+    texture: "2k_mercury.jpg",
   },
   {
     name: "Venus",
@@ -51,7 +54,7 @@ const bodies = [
     speed: 1.1,
     spin: 0.3,
     phase: 1.5,
-    color: 0xe6c27a,
+    texture: "2k_venus_surface.jpg",
   },
   {
     name: "Earth",
@@ -60,7 +63,7 @@ const bodies = [
     speed: 0.8,
     spin: 1.0,
     phase: 3.0,
-    color: 0x3377ff,
+    texture: "2k_earth_daymap.jpg",
   },
   {
     name: "Mars",
@@ -69,7 +72,7 @@ const bodies = [
     speed: 0.6,
     spin: 0.9,
     phase: 4.5,
-    color: 0xcc5533,
+    texture: "2k_mars.jpg",
   },
   {
     name: "Jupiter",
@@ -78,7 +81,7 @@ const bodies = [
     speed: 0.3,
     spin: 1.8,
     phase: 5.5,
-    color: 0xd9a066,
+    texture: "2k_jupiter.jpg",
   },
   {
     name: "Saturn",
@@ -87,7 +90,7 @@ const bodies = [
     speed: 0.22,
     spin: 1.6,
     phase: 0.8,
-    color: 0xe3d29a,
+    texture: "2k_saturn.jpg",
   },
   {
     name: "Uranus",
@@ -96,7 +99,7 @@ const bodies = [
     speed: 0.15,
     spin: 1.2,
     phase: 2.2,
-    color: 0x7fd6e0,
+    texture: "2k_uranus.jpg",
   },
   {
     name: "Neptune",
@@ -105,7 +108,7 @@ const bodies = [
     speed: 0.1,
     spin: 1.2,
     phase: 4.0,
-    color: 0x3a4fd6,
+    texture: "2k_neptune.jpg",
   },
   {
     name: "Moon",
@@ -114,20 +117,24 @@ const bodies = [
     speed: 3.0,
     spin: 0.5,
     phase: 0.0,
-    color: 0xcccccc,
+    texture: "2k_moon.jpg",
     parent: "Earth",
   },
 ];
 
+const loader = new THREE.TextureLoader();
+
 for (const b of bodies) {
+  const map = loader.load(`textures/${b.texture}`);
+  map.colorSpace = THREE.SRGBColorSpace;
   b.mesh = new THREE.Mesh(
     new THREE.SphereGeometry(b.radius, 32, 32),
-    new THREE.MeshStandardMaterial({ color: b.color }),
+    new THREE.MeshStandardMaterial({ map }),
   );
   scene.add(b.mesh);
 }
 
-const saturn = bodies.find((b) => b.name === 'Saturn');
+const saturn = bodies.find((b) => b.name === "Saturn");
 const rings = new THREE.Mesh(
   new THREE.RingGeometry(3.4, 5.2, 64),
   new THREE.MeshStandardMaterial({
@@ -135,7 +142,7 @@ const rings = new THREE.Mesh(
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0.9,
-  })
+  }),
 );
 rings.rotation.x = Math.PI / 2 + 0.4; // lay flat, then tilt
 scene.add(rings);
