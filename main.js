@@ -191,8 +191,11 @@ scene.add(stars);
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const popup = document.getElementById("popup");
-let downX = 0,
-  downY = 0;
+let downX = 0;
+let downY = 0;
+
+let followed = null;
+let zoomFrames = 0;
 
 renderer.domElement.addEventListener("pointerdown", (e) => {
   downX = e.clientX;
@@ -210,11 +213,14 @@ renderer.domElement.addEventListener("pointerup", (e) => {
   const hits = raycaster.intersectObjects(clickables);
   if (hits.length > 0) {
     const obj = hits[0].object;
+    followed = obj;
+    zoomFrames = 60;
     const b =
       obj === sun ? sun.userData : bodies.find((body) => body.mesh === obj);
     popup.innerHTML = `<b>${b.name}</b><br>Orbit distance: ${b.distance}<br>Radius: ${b.radius}`;
     popup.style.display = "block";
   } else {
+    followed = null;
     popup.style.display = "none";
   }
 });
@@ -234,7 +240,26 @@ function animate() {
     b.mesh.position.z = center.z + Math.sin(angle) * b.distance;
     b.mesh.rotation.y += dt * b.spin;
   }
+
   rings.position.copy(saturn.mesh.position);
+
+  if (followed) {
+    const delta = followed.position
+      .clone()
+      .sub(controls.target)
+      .multiplyScalar(0.1);
+    controls.target.add(delta);
+    camera.position.add(delta);
+
+    if (zoomFrames > 0) {
+      zoomFrames--;
+      const offset = camera.position.clone().sub(controls.target);
+      const wanted = followed.geometry.parameters.radius * 6;
+      offset.setLength(THREE.MathUtils.lerp(offset.length(), wanted, 0.08));
+      camera.position.copy(controls.target).add(offset);
+    }
+  }
+
   controls.update();
   renderer.render(scene, camera);
 }
