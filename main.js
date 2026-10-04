@@ -134,14 +134,43 @@ for (const b of bodies) {
   scene.add(b.mesh);
 }
 
-const saturn = bodies.find((b) => b.name === "Saturn");
-const rings = new THREE.Mesh(
-  new THREE.RingGeometry(3.4, 5.2, 64),
+// Venus cloud layer: slightly larger translucent shell over the surface
+const venus = bodies.find((b) => b.name === "Venus");
+const venusAtmosMap = loader.load("textures/2k_venus_atmosphere.jpg");
+venusAtmosMap.colorSpace = THREE.SRGBColorSpace;
+const venusAtmos = new THREE.Mesh(
+  new THREE.SphereGeometry(venus.radius * 1.04, 32, 32),
   new THREE.MeshStandardMaterial({
-    color: 0xcdbf98,
+    map: venusAtmosMap,
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false,
+  }),
+);
+venusAtmos.raycast = () => {}; // clicks should hit Venus itself
+venus.mesh.add(venusAtmos);
+
+const saturn = bodies.find((b) => b.name === "Saturn");
+const ringInner = 3.4;
+const ringOuter = 5.2;
+const ringGeometry = new THREE.RingGeometry(ringInner, ringOuter, 128);
+// The ring texture is a radial strip, so map u from inner to outer edge
+const ringPos = ringGeometry.attributes.position;
+const ringUv = ringGeometry.attributes.uv;
+const v3 = new THREE.Vector3();
+for (let i = 0; i < ringPos.count; i++) {
+  v3.fromBufferAttribute(ringPos, i);
+  ringUv.setXY(i, (v3.length() - ringInner) / (ringOuter - ringInner), 0.5);
+}
+const ringMap = loader.load("textures/2k_saturn_ring_alpha.png");
+ringMap.colorSpace = THREE.SRGBColorSpace;
+const rings = new THREE.Mesh(
+  ringGeometry,
+  new THREE.MeshStandardMaterial({
+    map: ringMap,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.9,
+    depthWrite: false,
   }),
 );
 rings.rotation.x = Math.PI / 2 + 0.4; // lay flat, then tilt
@@ -242,6 +271,7 @@ function animate() {
   }
 
   rings.position.copy(saturn.mesh.position);
+  venusAtmos.rotation.y += dt * 0.2; // clouds drift relative to the surface
 
   if (followed) {
     const delta = followed.position
